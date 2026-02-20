@@ -51,8 +51,8 @@ echo "FRED_API_KEY=tu_key_aqui" > .env
 ## Progreso
 
 - [x] Fase 1: Data Engineering (ingesta, limpieza, procesamiento)
-- [ ] Fase 2: Feature Engineering
-- [ ] Fase 3: Modelos ML
+- [x] Fase 2: Feature Engineering
+- [x] Fase 3: Modelos ML
 - [ ] Fase 4: MLflow
 - [ ] Fase 5: Validación de datos (Great Expectations)
 - [ ] Fase 6: Tests
