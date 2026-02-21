@@ -1,0 +1,16 @@
+creation_timestamp: 1771637759569
+current_stage: None
+deployment_job_state: null
+description: null
+last_updated_timestamp: 1771637759569
+model_id: m-49580604f5a8438790d296e91dfe9c2e
+name: inflation-predictor
+run_id: 523aa15c55684d08b4cd18ef03ca5a55
+run_link: null
+source: models:/m-49580604f5a8438790d296e91dfe9c2e
+status: READY
+status_message: null
+storage_location: file:///Users/javiermondragon/Documents/data_projects/inflation-predictor/mlruns/363065231111957846/models/m-49580604f5a8438790d296e91dfe9c2e/artifacts
+user_id: null
+version: 1
+workspace: default

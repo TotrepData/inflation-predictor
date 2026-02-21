@@ -1,0 +1,14 @@
+artifact_uri: file:///Users/javiermondragon/Documents/data_projects/inflation-predictor/mlruns/363065231111957846/2d309cdb46124c3d8f56bb5c89b31fc5/artifacts
+end_time: 1771637537730
+entry_point_name: ''
+experiment_id: '363065231111957846'
+lifecycle_stage: active
+run_id: 2d309cdb46124c3d8f56bb5c89b31fc5
+run_name: Gradient Boosting
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1771637534301
+status: 3
+tags: []
+user_id: javiermondragon

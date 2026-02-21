@@ -1,0 +1,14 @@
+artifact_uri: file:///Users/javiermondragon/Documents/data_projects/inflation-predictor/mlruns/363065231111957846/82afd4a5f8994d77adadaab18bebd157/artifacts
+end_time: 1771637191018
+entry_point_name: ''
+experiment_id: '363065231111957846'
+lifecycle_stage: active
+run_id: 82afd4a5f8994d77adadaab18bebd157
+run_name: SVR
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1771637187973
+status: 3
+tags: []
+user_id: javiermondragon

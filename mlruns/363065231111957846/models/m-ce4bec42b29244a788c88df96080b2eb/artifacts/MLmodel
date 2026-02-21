@@ -1,0 +1,23 @@
+artifact_path: file:///Users/javiermondragon/Documents/data_projects/inflation-predictor/mlruns/363065231111957846/models/m-ce4bec42b29244a788c88df96080b2eb/artifacts
+flavors:
+  python_function:
+    env:
+      conda: conda.yaml
+      virtualenv: python_env.yaml
+    loader_module: mlflow.sklearn
+    model_path: model.pkl
+    predict_fn: predict
+    python_version: 3.10.14
+  sklearn:
+    code: null
+    pickled_model: model.pkl
+    serialization_format: cloudpickle
+    sklearn_version: 1.7.2
+    skops_trusted_types: null
+mlflow_version: 3.10.0
+model_id: m-ce4bec42b29244a788c88df96080b2eb
+model_size_bytes: 336438
+model_uuid: m-ce4bec42b29244a788c88df96080b2eb
+prompts: null
+run_id: 2d309cdb46124c3d8f56bb5c89b31fc5
+utc_time_created: '2026-02-21 01:32:15.016060'

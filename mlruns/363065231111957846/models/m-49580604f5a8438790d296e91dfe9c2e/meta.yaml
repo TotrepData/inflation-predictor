@@ -1,0 +1,10 @@
+artifact_location: file:///Users/javiermondragon/Documents/data_projects/inflation-predictor/mlruns/363065231111957846/models/m-49580604f5a8438790d296e91dfe9c2e/artifacts
+creation_timestamp: 1771637531685
+experiment_id: '363065231111957846'
+last_updated_timestamp: 1771637534296
+model_id: m-49580604f5a8438790d296e91dfe9c2e
+model_type: null
+name: model
+source_run_id: 523aa15c55684d08b4cd18ef03ca5a55
+status: 2
+status_message: null

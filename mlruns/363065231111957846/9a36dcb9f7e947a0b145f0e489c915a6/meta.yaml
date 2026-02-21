@@ -1,0 +1,14 @@
+artifact_uri: file:///Users/javiermondragon/Documents/data_projects/inflation-predictor/mlruns/363065231111957846/9a36dcb9f7e947a0b145f0e489c915a6/artifacts
+end_time: 1771637195158
+entry_point_name: ''
+experiment_id: '363065231111957846'
+lifecycle_stage: active
+run_id: 9a36dcb9f7e947a0b145f0e489c915a6
+run_name: Random Forest
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1771637191020
+status: 3
+tags: []
+user_id: javiermondragon

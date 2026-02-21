@@ -1,72 +1,118 @@
-# Predictor de Inflación USA
+# 📈 US Inflation Predictor
 
-Modelo de machine learning para predecir la inflación mensual de Estados Unidos usando datos de la Federal Reserve (FRED).
+A machine learning pipeline to predict monthly US inflation using macroeconomic indicators.
 
-## Objetivo
+![Python](https://img.shields.io/badge/Python-3.10-blue)
+![scikit-learn](https://img.shields.io/badge/scikit--learn-1.3-orange)
+![MLflow](https://img.shields.io/badge/MLflow-2.0-blue)
+![License](https://img.shields.io/badge/License-MIT-green)
 
-Replicar y extender el paper "The consumer price index prediction using machine learning approaches" (ScienceDirect, 2023), con un pipeline profesional de data engineering y MLOps.
+## Overview
 
-## Datos
+This project predicts **monthly inflation** (CPI % change) for the United States using:
+- Federal Reserve interest rates
+- Oil prices (WTI)
+- Gold prices
 
-Fuente: [FRED API](https://fred.stlouisfed.org/)
+Based on the paper *"The consumer price index prediction using machine learning approaches"* (ScienceDirect, 2023).
 
-| Variable | Código | Descripción |
-|----------|--------|-------------|
-| CPI | CPIAUCSL | Inflación (target) |
-| Fed Rate | FEDFUNDS | Tasa de interés |
-| Oil Price | DCOILWTICO | Precio del petróleo |
-| Gold Price | NASDAQQGLDI | Precio del oro |
+## Results
 
-## Estructura
+| Model | RMSE | MAE | R² |
+|-------|------|-----|-----|
+| **Random Forest** | **0.209** | **0.153** | **0.468** |
+| Gradient Boosting | 0.263 | 0.178 | 0.157 |
+| Lasso | 0.363 | 0.242 | -0.612 |
+
+**Best model:** Random Forest with R² = 0.47 and MAE = 0.15%
+
+## Project Structure
+
 ```
 inflation-predictor/
 ├── data/
-│   ├── raw/           # Datos crudos de FRED
-│   └── processed/     # Datos listos para modelo
-├── notebooks/         # Exploración y análisis
-├── src/               # Código de producción (pendiente)
-├── .env               # API keys (no se sube)
-├── .gitignore
+│   ├── raw/                 # Raw data from APIs
+│   └── processed/           # Clean data for modeling
+├── figures/                 # EDA and model visualizations
+├── models/                  # Trained models (.joblib)
+├── notebooks/
+│   ├── 01_data_engineering.ipynb
+│   ├── 02_eda.ipynb
+│   ├── 03_modelo.ipynb
+│   └── 04_mlflow.ipynb
+├── mlruns/                  # MLflow tracking
+├── src/                     # Production code (coming soon)
+├── .env                     # API keys (not in repo)
 ├── requirements.txt
 └── README.md
 ```
 
-## Instalación
+## Data Sources
+
+| Variable | Source | Code | Period |
+|----------|--------|------|--------|
+| CPI | FRED API | CPIAUCSL | 1947-2026 |
+| Fed Rate | FRED API | FEDFUNDS | 1954-2026 |
+| Oil Price | FRED API | DCOILWTICO | 1986-2026 |
+| Gold Price | World Bank | Pink Sheet | 1960-2025 |
+
+## Quick Start
+
 ```bash
-# Clonar
-git clone https://github.com/TU_USUARIO/inflation-predictor.git
+# Clone
+git clone https://github.com/TotrepData/inflation-predictor.git
 cd inflation-predictor
 
-# Crear entorno virtual
+# Setup environment
 python -m venv venv
 source venv/bin/activate
-
-# Instalar dependencias
 pip install -r requirements.txt
 
-# Configurar API key
-echo "FRED_API_KEY=tu_key_aqui" > .env
+# Configure API key
+echo "FRED_API_KEY=your_key_here" > .env
+
+# Run notebooks in order
+jupyter notebook
 ```
 
-## Progreso
+## Features
 
-- [x] Fase 1: Data Engineering (ingesta, limpieza, procesamiento)
-- [x] Fase 2: Feature Engineering
-- [x] Fase 3: Modelos ML
-- [ ] Fase 4: MLflow
-- [ ] Fase 5: Validación de datos (Great Expectations)
-- [ ] Fase 6: Tests
-- [ ] Fase 7: AWS (Terraform)
-- [ ] Fase 8: Lambdas
-- [ ] Fase 9: CI/CD
-- [ ] Fase 10: Monitoreo
-- [ ] Fase 11: A/B Testing
-- [ ] Fase 12: Dashboard
+The model uses 40 features including:
+- **Lags:** 1, 3, 6, 12 months for each variable
+- **Moving averages:** 3, 6, 12 months
+- **Percent changes:** Month-over-month, Year-over-year
+- **Temporal:** Year, month, quarter
 
-## Stack
+## Roadmap
 
-- Python, pandas, requests
-- MLflow (pendiente)
-- AWS: S3, Lambda, Athena, EventBridge (pendiente)
-- Terraform (pendiente)
-- GitHub Actions (pendiente)
+- [x] Data Engineering
+- [x] Exploratory Data Analysis
+- [x] ML Modeling (6 models compared)
+- [ ] MLflow Tracking
+- [ ] Data Validation (Great Expectations)
+- [ ] Unit Tests
+- [ ] AWS Deployment (Terraform)
+- [ ] CI/CD (GitHub Actions)
+- [ ] Dashboard
+
+## Tech Stack
+
+**Data:** pandas, numpy, requests, openpyxl
+
+**ML:** scikit-learn, MLflow
+
+**Visualization:** matplotlib, seaborn
+
+**Infrastructure (planned):** AWS (S3, Lambda, EventBridge), Terraform, GitHub Actions
+
+## License
+
+MIT
+
+## Author
+
+**Javier Mondragón**
+
+---
+
+*Built as a learning project for data engineering and MLOps*

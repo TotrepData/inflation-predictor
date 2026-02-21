@@ -1,0 +1,14 @@
+artifact_uri: file:///Users/javiermondragon/Documents/data_projects/inflation-predictor/mlruns/363065231111957846/6cf9c709c6a14468acca13b44a5cfedb/artifacts
+end_time: 1771637522368
+entry_point_name: ''
+experiment_id: '363065231111957846'
+lifecycle_stage: active
+run_id: 6cf9c709c6a14468acca13b44a5cfedb
+run_name: Linear Regression
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1771637518526
+status: 3
+tags: []
+user_id: javiermondragon

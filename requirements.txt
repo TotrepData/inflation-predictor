@@ -108,3 +108,4 @@ widgetsnbextension==4.0.15
 openpyxl
 matplotlib
 seaborn
+mlflow

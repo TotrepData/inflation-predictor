@@ -1,0 +1,14 @@
+artifact_uri: file:///Users/javiermondragon/Documents/data_projects/inflation-predictor/mlruns/363065231111957846/402a150936204a6cb8c3c87f0ff21efd/artifacts
+end_time: 1771637525354
+entry_point_name: ''
+experiment_id: '363065231111957846'
+lifecycle_stage: active
+run_id: 402a150936204a6cb8c3c87f0ff21efd
+run_name: Ridge
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1771637522370
+status: 3
+tags: []
+user_id: javiermondragon

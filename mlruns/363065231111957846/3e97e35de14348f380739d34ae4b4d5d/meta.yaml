@@ -1,0 +1,14 @@
+artifact_uri: file:///Users/javiermondragon/Documents/data_projects/inflation-predictor/mlruns/363065231111957846/3e97e35de14348f380739d34ae4b4d5d/artifacts
+end_time: 1771637528312
+entry_point_name: ''
+experiment_id: '363065231111957846'
+lifecycle_stage: active
+run_id: 3e97e35de14348f380739d34ae4b4d5d
+run_name: Lasso
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1771637525358
+status: 3
+tags: []
+user_id: javiermondragon
