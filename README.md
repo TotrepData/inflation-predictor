@@ -1,11 +1,6 @@
-# 📈 US Inflation Predictor
+# US Inflation Predictor
 
 A machine learning pipeline to predict monthly US inflation using macroeconomic indicators.
-
-![Python](https://img.shields.io/badge/Python-3.10-blue)
-![scikit-learn](https://img.shields.io/badge/scikit--learn-1.3-orange)
-![MLflow](https://img.shields.io/badge/MLflow-2.0-blue)
-![License](https://img.shields.io/badge/License-MIT-green)
 
 ## Overview
 
@@ -112,7 +107,3 @@ MIT
 ## Author
 
 **Javier Mondragón**
-
----
-
-*Built as a learning project for data engineering and MLOps*
