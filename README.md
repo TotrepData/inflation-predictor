@@ -83,7 +83,7 @@ The model uses 40 features including:
 - [x] Data Engineering
 - [x] Exploratory Data Analysis
 - [x] ML Modeling (6 models compared)
-- [ ] MLflow Tracking
+- [x] MLflow Tracking
 - [ ] Data Validation (Great Expectations)
 - [ ] Unit Tests
 - [ ] AWS Deployment (Terraform)
