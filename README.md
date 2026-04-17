@@ -1,109 +1,131 @@
 # US Inflation Predictor
 
-A machine learning pipeline to predict monthly US inflation using macroeconomic indicators.
+Pipeline para pronóstico de la inflación mensual de Estados Unidos combinando modelos econométricos y técnicas de aprendizaje automático.
 
-## Overview
+## Resumen
 
-This project predicts **monthly inflation** (CPI % change) for the United States using:
-- Federal Reserve interest rates
-- Oil prices (WTI)
-- Gold prices
+El proyecto estima la **inflación mensual** (variación porcentual del CPI) a múltiples horizontes (h = 1, 3, 6, 12 meses) utilizando indicadores macroeconómicos de FRED y el Banco Mundial.
 
-Based on the paper *"The consumer price index prediction using machine learning approaches"* (ScienceDirect, 2023).
+**Usuario objetivo:** analistas de mesa de tesorería y gestión de portafolios de renta fija. Los horizontes seleccionados corresponden a las ventanas de rebalanceo más comunes en esa actividad.
 
-## Results
+**Marco académico:** Curso *Aprendizaje Automático (MINE-4206)*, Maestría en Ingeniería de Información, Universidad de los Andes.
 
-| Model | RMSE | MAE | R² |
-|-------|------|-----|-----|
-| **Random Forest** | **0.209** | **0.153** | **0.468** |
-| Gradient Boosting | 0.263 | 0.178 | 0.157 |
-| Lasso | 0.363 | 0.242 | -0.612 |
+**Equipo:** Javier Mondragón, Jessica Joya, Alberth Pérez.
 
-**Best model:** Random Forest with R² = 0.47 and MAE = 0.15%
+## Modelos
 
-## Project Structure
+Se compara un benchmark econométrico contra tres modelos de ML representativos de las dos familias predominantes en la literatura:
+
+| Modelo | Familia | Rol |
+|---|---|---|
+| ARIMA(1,1,1) | Econometría clásica | Benchmark |
+| Elastic Net | Regularización lineal | Controla multicolinealidad entre PPI, M2 y Retail Sales |
+| Random Forest | Árboles (bagging) | Captura no linealidad |
+| XGBoost | Árboles (boosting) | Fuerte en períodos de alta volatilidad (Naghi et al., 2024) |
+
+Validación mediante **walk-forward expanding window**. Interpretabilidad con **SHAP**.
+
+## Dataset
+
+408 observaciones mensuales (ene-1992 → dic-2025), 12 variables, sin nulos.
+
+| Variable | Código | Fuente |
+|---|---|---|
+| CPI (objetivo) | CPIAUCSL | FRED |
+| Federal Funds Rate | FEDFUNDS | FRED |
+| Unemployment Rate | UNRATE | FRED |
+| Industrial Production | INDPRO | FRED |
+| Money Supply M2 | M2SL | FRED |
+| Retail Sales | RRSFS | FRED |
+| Capacity Utilization | TCU | FRED |
+| 10Y Treasury Yield | GS10 | FRED |
+| Producer Price Index | PPIACO | FRED |
+| Consumer Sentiment | UMCSENT | FRED |
+| Oil Price WTI | DCOILWTICO | FRED (agregado a mensual) |
+| Gold Price | Pink Sheet | World Bank |
+
+**Nota metodológica:** el CPI de octubre 2025 no fue publicado por el BLS al momento de descarga (probable retraso por shutdown del gobierno de EE.UU.). Se imputa con forward-fill, consistente con la metodología declarada en la propuesta.
+
+## Estructura del proyecto
 
 ```
 inflation-predictor/
 ├── data/
-│   ├── raw/                 # Raw data from APIs
-│   └── processed/           # Clean data for modeling
-├── figures/                 # EDA and model visualizations
-├── models/                  # Trained models (.joblib)
+│   ├── raw/                    # Datos crudos (FRED, World Bank)
+│   └── processed/              # Dataset integrado listo para modelar
+├── figures/                    # Gráficos de EDA y modelado
+├── models/                     # Modelos entrenados (.joblib)
 ├── notebooks/
-│   ├── 01_data_engineering.ipynb
-│   ├── 02_eda.ipynb
-│   ├── 03_modelo.ipynb
-│   └── 04_mlflow.ipynb
-├── mlruns/                  # MLflow tracking
-├── src/                     # Production code (coming soon)
-├── .env                     # API keys (not in repo)
+│   ├── 01_data_engineering.ipynb   # Ingesta, limpieza, integración
+│   ├── 02_eda.ipynb                # Análisis exploratorio
+│   ├── 03_feature_engineering.ipynb  # Lags, MAs, MoM/YoY
+│   ├── 04_modeling.ipynb             # ARIMA + 3 ML, walk-forward
+│   └── 05_shap.ipynb                 # Interpretabilidad
+├── mlruns/                     # Tracking de experimentos (MLflow)
+├── app/                        # Aplicación Streamlit (pronóstico en vivo)
+├── .env                        # FRED_API_KEY (no versionado)
 ├── requirements.txt
 └── README.md
 ```
 
-## Data Sources
+## Feature engineering
 
-| Variable | Source | Code | Period |
-|----------|--------|------|--------|
-| CPI | FRED API | CPIAUCSL | 1947-2026 |
-| Fed Rate | FRED API | FEDFUNDS | 1954-2026 |
-| Oil Price | FRED API | DCOILWTICO | 1986-2026 |
-| Gold Price | World Bank | Pink Sheet | 1960-2025 |
+Variables derivadas generadas en `03_feature_engineering.ipynb`:
+
+- **Rezagos** (1, 3, 6, 12 meses) por variable
+- **Promedios móviles** (3, 6, 12 meses)
+- **Variaciones porcentuales** mes a mes (MoM) y año a año (YoY)
+- **Variables temporales**: mes, trimestre
+- **Transformación logarítmica** para `gold_price` (no estacionaria ni en 1ª diferencia)
+- **Target:** `inflation_mom = CPI.pct_change() * 100`
+
+## Evaluación
+
+- **Métricas:** RMSE, MAE, R² por modelo × horizonte
+- **Validación:** walk-forward expanding window (entrenamiento solo con datos pasados)
+- **Análisis comparativo:** pre-pandemia (1992–2019) vs post-pandemia (2020–2025)
 
 ## Quick Start
 
 ```bash
-# Clone
 git clone https://github.com/TotrepData/inflation-predictor.git
 cd inflation-predictor
 
-# Setup environment
 python -m venv venv
 source venv/bin/activate
 pip install -r requirements.txt
 
-# Configure API key
-echo "FRED_API_KEY=your_key_here" > .env
+echo "FRED_API_KEY=tu_key_aqui" > .env
 
-# Run notebooks in order
-jupyter notebook
+jupyter notebook  # correr notebooks 01 → 05 en orden
 ```
 
-## Features
+## Aplicación Streamlit (en desarrollo)
 
-The model uses 40 features including:
-- **Lags:** 1, 3, 6, 12 months for each variable
-- **Moving averages:** 3, 6, 12 months
-- **Percent changes:** Month-over-month, Year-over-year
-- **Temporal:** Year, month, quarter
+Dashboard con pronóstico vigente usando datos frescos de FRED y modelos pre-entrenados. Cuatro vistas:
 
-## Roadmap
+1. **Pronóstico vigente** — forecast del CPI a 1, 3, 6 y 12 meses
+2. **Explorar variables macro** — series, distribuciones, correlaciones
+3. **Comparación de modelos** — métricas por horizonte
+4. **Interpretabilidad (SHAP)** — importancia global y del último pronóstico
 
-- [x] Data Engineering
-- [x] Exploratory Data Analysis
-- [x] ML Modeling (6 models compared)
-- [x] MLflow Tracking
-- [ ] Data Validation (Great Expectations)
-- [ ] Unit Tests
-- [ ] AWS Deployment (Terraform)
-- [ ] CI/CD (GitHub Actions)
-- [ ] Dashboard
+Deploy planeado en Streamlit Community Cloud.
 
-## Tech Stack
+## Stack técnico
 
-**Data:** pandas, numpy, requests, openpyxl
+**Datos:** pandas, numpy, requests, openpyxl
+**ML:** scikit-learn, xgboost, statsmodels, shap, mlflow
+**Visualización:** matplotlib, seaborn, plotly
+**App:** streamlit
 
-**ML:** scikit-learn, MLflow
+## Referencias
 
-**Visualization:** matplotlib, seaborn
+- Fondo Monetario Internacional (2024). *Mending the Crystal Ball: Enhanced Inflation Forecasts with Machine Learning.* IMF Working Paper WP/24/206.
+- Medeiros, M. C., Vasconcelos, G. F., Veiga, Á., & Zilberman, E. (2021). Forecasting inflation in a data-rich environment: The benefits of machine learning methods. *Journal of Business & Economic Statistics*, 39(1), 98–119.
+- Naghi, A., Castle, J. L., Doornik, J. A., & Hendry, D. F. (2024). The benefits of forecasting inflation with machine learning: New evidence. *Journal of Applied Econometrics.*
+- Nguyen, T. T., Nguyen, H. G., Lee, J. Y., Wang, Y. L., & Tsai, C. S. (2023). The consumer price index prediction using machine learning approaches: Evidence from the United States. *Heliyon*, 9(10), e20730.
+- Lundberg, S. M., & Lee, S. I. (2017). A unified approach to interpreting model predictions. *NeurIPS 30.*
 
-**Infrastructure (planned):** AWS (S3, Lambda, EventBridge), Terraform, GitHub Actions
-
-## License
+## Licencia
 
 MIT
-
-## Author
-
-**Javier Mondragón**
