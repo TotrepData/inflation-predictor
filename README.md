@@ -2,7 +2,7 @@
 
 Pipeline para pronóstico de la inflación mensual de Estados Unidos combinando modelos econométricos y técnicas de aprendizaje automático.
 
-**🚀 App desplegada:** https://inflation-predictor-ckxg3us8ypve3wud9adsyj.streamlit.app
+**App desplegada:** https://inflation-predictor-ckxg3us8ypve3wud9adsyj.streamlit.app
 
 ## Resumen
 

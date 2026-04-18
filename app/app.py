@@ -88,11 +88,10 @@ def _panel_as_bytes(panel: pd.DataFrame) -> bytes:
 
 st.set_page_config(
     page_title="US Inflation Predictor",
-    page_icon="📊",
     layout="wide",
 )
 
-st.title("📊 US Inflation Predictor")
+st.title("US Inflation Predictor")
 st.caption(
     "Pronóstico mensual del CPI de EE.UU. para analistas de mesa de tesorería. "
     "Modelos entrenados con validación walk-forward · Universidad de los Andes"
@@ -127,10 +126,10 @@ with st.sidebar:
         st.warning("Sin API key — usando snapshot local")
 
 tab1, tab2, tab3, tab4 = st.tabs([
-    "📈 Pronóstico vigente",
-    "🔍 Explorar variables",
-    "⚖️ Comparación de modelos",
-    "🧠 Interpretabilidad (SHAP)",
+    "Pronóstico vigente",
+    "Explorar variables",
+    "Comparación de modelos",
+    "Interpretabilidad (SHAP)",
 ])
 
 # ------------------------------------------------------------------
