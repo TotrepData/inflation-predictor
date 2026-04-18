@@ -2,6 +2,8 @@
 
 Pipeline para pronóstico de la inflación mensual de Estados Unidos combinando modelos econométricos y técnicas de aprendizaje automático.
 
+**🚀 App desplegada:** https://inflation-predictor-ckxg3us8ypve3wud9adsyj.streamlit.app
+
 ## Resumen
 
 El proyecto estima la **inflación mensual** (variación porcentual del CPI) a múltiples horizontes (h = 1, 3, 6, 12 meses) utilizando indicadores macroeconómicos de FRED y el Banco Mundial.
@@ -100,16 +102,41 @@ echo "FRED_API_KEY=tu_key_aqui" > .env
 jupyter notebook  # correr notebooks 01 → 05 en orden
 ```
 
-## Aplicación Streamlit (en desarrollo)
+## Aplicación Streamlit
+
+**Demo en línea:** https://inflation-predictor-ckxg3us8ypve3wud9adsyj.streamlit.app
 
 Dashboard con pronóstico vigente usando datos frescos de FRED y modelos pre-entrenados. Cuatro vistas:
 
-1. **Pronóstico vigente** — forecast del CPI a 1, 3, 6 y 12 meses
-2. **Explorar variables macro** — series, distribuciones, correlaciones
-3. **Comparación de modelos** — métricas por horizonte
-4. **Interpretabilidad (SHAP)** — importancia global y del último pronóstico
+1. **Pronóstico vigente** — forecast del CPI a 1, 3, 6 y 12 meses, con comparación frente a la meta del 2 % de la Reserva Federal.
+2. **Explorar variables macro** — series temporales, distribuciones y correlaciones por variable.
+3. **Comparación de modelos** — tablas y gráficas RMSE / MAE / R² por modelo × horizonte, incluida la segmentación pre/post COVID.
+4. **Interpretabilidad (SHAP)** — importancia global, distribución de efectos y waterfall del pronóstico más reciente.
 
-Deploy planeado en Streamlit Community Cloud.
+### Correr localmente
+
+```bash
+cd app
+pip install -r requirements.txt
+cd ..
+streamlit run app/app.py
+```
+
+La app lee `FRED_API_KEY` desde `.env` (en local) o `st.secrets` (en Streamlit Cloud). Si no hay key configurada, recurre al snapshot local `data/processed/dataset_modelo.csv`.
+
+### Desplegar en Streamlit Community Cloud
+
+1. Crear una app nueva en [share.streamlit.io](https://share.streamlit.io) conectada a este repositorio.
+2. Configurar:
+   - **Repository:** `TotrepData/inflation-predictor`
+   - **Branch:** `master`
+   - **Main file path:** `app/app.py`
+   - **Python version:** 3.10 o 3.11
+3. En *Advanced settings → Secrets* agregar:
+   ```toml
+   FRED_API_KEY = "tu_api_key_aqui"
+   ```
+4. Deploy. Streamlit Cloud detecta automáticamente `app/requirements.txt`.
 
 ## Stack técnico
 
