@@ -1,7 +1,9 @@
 # Dependencias para la app Streamlit
 # Para correr localmente:
-#   pip install -r app/requirements-app.txt
+#   pip install -r app/requirements.txt
 #   streamlit run app/app.py
+# Streamlit Community Cloud detecta este archivo automáticamente por estar
+# en el mismo directorio que app.py.
 
 streamlit>=1.40
 plotly>=5.20
