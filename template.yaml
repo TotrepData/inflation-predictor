@@ -1,0 +1,138 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: >
+  PoC Inflation Predictor — Pipeline Lambda cloud-native
+  MINE4105 · Soluciones de Datos en la Nube · Uniandes
+
+# ─── Parámetros ───────────────────────────────────────────────────────────────
+Parameters:
+  S3Bucket:
+    Type: String
+    Default: poc-inflation-predictor
+    Description: Nombre del bucket S3 del pipeline
+
+# ─── Configuración compartida entre las 3 funciones ──────────────────────────
+Globals:
+  Function:
+    Runtime: python3.11
+    Timeout: 300
+    MemorySize: 512
+    # Layer AWSSDKPandas incluye pandas, numpy y pyarrow sin empaquetar en el zip
+    Layers:
+      - !Sub arn:aws:lambda:${AWS::Region}:336392948345:layer:AWSSDKPandas-Python311:20
+    Environment:
+      Variables:
+        S3_BUCKET: !Ref S3Bucket
+
+# ─── Recursos ─────────────────────────────────────────────────────────────────
+Resources:
+
+  # Bucket S3 — declarado aquí para que SAM pueda configurar los triggers de eventos.
+  # DeletionPolicy: Retain → sam delete no elimina el bucket ni los datos.
+  # NOTA: si el bucket ya existe en tu cuenta, elimínalo antes del primer
+  #       sam deploy (los modelos están en models/ del repo para re-subir).
+  DataBucket:
+    Type: AWS::S3::Bucket
+    DeletionPolicy: Retain
+    Properties:
+      BucketName: !Ref S3Bucket
+
+  # Rol IAM compartido por las 3 Lambdas
+  LambdaRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: poc-inflation-lambda-role
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/AmazonS3FullAccess
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+      Policies:
+        - PolicyName: ReadSecretsManager
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action: secretsmanager:GetSecretValue
+                Resource: !Sub arn:aws:secretsmanager:${AWS::Region}:${AWS::AccountId}:secret:poc-inflation/*
+
+  # Lambda 1 — Collector (invocación manual o programada)
+  # Al terminar escribe bronze/_ready → dispara automáticamente el ETL
+  CollectorFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: fn-poc-collector
+      Handler: handler.handler
+      CodeUri: lambdas/collector/
+      Role: !GetAtt LambdaRole.Arn
+      Description: Descarga 11 series FRED → bronze/*.csv y escribe bronze/_ready
+
+      Environment:
+        Variables:
+          FRED_API_KEY_SECRET: poc-inflation/fred-api-key
+
+  # Lambda 2 — ETL
+  # Se dispara automáticamente cuando Collector escribe bronze/_ready
+  # Produce silver/dataset_modelo.parquet → dispara automáticamente Features
+  EtlFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: fn-poc-etl
+      Handler: handler.handler
+      CodeUri: lambdas/etl/
+      Role: !GetAtt LambdaRole.Arn
+      Description: Merge + limpieza bronze → silver/dataset_modelo.parquet
+      Events:
+        BronzeReady:
+          Type: S3
+          Properties:
+            Bucket: !Ref DataBucket
+            Events: s3:ObjectCreated:*
+            Filter:
+              S3Key:
+                Rules:
+                  - Name: prefix
+                    Value: bronze/_ready
+
+  # Lambda 3 — Features
+  # Se dispara automáticamente cuando ETL escribe silver/dataset_modelo.parquet
+  # Produce gold/features.parquet → listo para SageMaker Notebook
+  FeaturesFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: fn-poc-features
+      Handler: handler.handler
+      CodeUri: lambdas/features/
+      Role: !GetAtt LambdaRole.Arn
+      Description: Feature engineering silver → gold/features.parquet
+      Events:
+        SilverReady:
+          Type: S3
+          Properties:
+            Bucket: !Ref DataBucket
+            Events: s3:ObjectCreated:*
+            Filter:
+              S3Key:
+                Rules:
+                  - Name: prefix
+                    Value: silver/dataset_modelo
+
+# ─── Outputs ──────────────────────────────────────────────────────────────────
+Outputs:
+  DataBucket:
+    Description: Bucket S3 del pipeline
+    Value: !Ref DataBucket
+  CollectorFunction:
+    Description: ARN de fn-poc-collector
+    Value: !GetAtt CollectorFunction.Arn
+  EtlFunction:
+    Description: ARN de fn-poc-etl
+    Value: !GetAtt EtlFunction.Arn
+  FeaturesFunction:
+    Description: ARN de fn-poc-features
+    Value: !GetAtt FeaturesFunction.Arn

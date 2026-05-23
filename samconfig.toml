@@ -1,0 +1,21 @@
+# Configuración por defecto para sam deploy
+# Generado para el proyecto PoC Inflation Predictor — MINE4105
+
+version = 0.1
+
+[default.global.parameters]
+stack_name = "poc-inflation-predictor-stack"
+
+[default.build.parameters]
+cached = true
+parallel = true
+
+[default.deploy.parameters]
+stack_name        = "poc-inflation-predictor-stack"
+region            = "us-east-1"
+confirm_changeset = true
+capabilities      = "CAPABILITY_IAM CAPABILITY_NAMED_IAM"
+resolve_s3        = true
+# FRED API key en Secrets Manager: poc-inflation/fred-api-key
+# Gemini API key en Secrets Manager: poc-inflation/gemini-api-key
+# No se requieren parameter_overrides

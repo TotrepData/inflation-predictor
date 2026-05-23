@@ -1,0 +1,1 @@
+# pandas, numpy, pyarrow vienen del layer AWSSDKPandas-Python311
