@@ -119,6 +119,7 @@ inflation-predictor/
 ├── mlruns/                         # Tracking de experimentos (MLflow)
 ├── app/                            # Aplicación Streamlit
 ├── .env                            # FRED_API_KEY (no versionado)
+├── poc_inflation_endpoint.ipynb    # Notebook PoC cloud-native AWS
 ├── requirements.txt
 └── README.md
 ```
@@ -205,6 +206,10 @@ FRED API → S3 Bronze/Silver/Gold → SageMaker Notebook → Random Forest h1 �
 | Latencia e2e p95 | < 5000 ms | < 5000 ms |
 | Predicción CPI MoM h1 | — | 0.2305% (ene-2026) |
 | R² Random Forest h1 | > 0.45 | 0.468 |
+
+### Estado actual
+
+Las celdas 1, 2 y 3 están operativas y validadas. La celda 4 (narrativa con Bedrock) está pendiente por una restricción de quota en cuenta nueva de AWS. Se abrió el caso de soporte #177951229800224 el 22 de mayo de 2026 solicitando aumento de quota para Claude Haiku 4.5. Pendiente revisar plan B (API Anthropic).
 
 ### Reproducir la PoC
 
