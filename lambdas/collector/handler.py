@@ -7,8 +7,17 @@ import pandas as pd
 import numpy as np
 
 S3_BUCKET = os.environ["S3_BUCKET"]
-FRED_API_KEY = os.environ["FRED_API_KEY"]
 FRED_URL = "https://api.stlouisfed.org/fred/series/observations"
+
+
+def get_fred_api_key():
+    secret_name = os.environ["FRED_API_KEY_SECRET"]
+    client = boto3.client("secretsmanager", region_name=os.environ.get("AWS_REGION", "us-east-1"))
+    secret = client.get_secret_value(SecretId=secret_name)
+    return json.loads(secret["SecretString"])["api_key"]
+
+
+FRED_API_KEY = get_fred_api_key()
 
 SERIES_FRED = {
     "CPIAUCSL": "cpi",

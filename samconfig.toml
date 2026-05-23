@@ -16,5 +16,6 @@ region            = "us-east-1"
 confirm_changeset = true
 capabilities      = "CAPABILITY_IAM CAPABILITY_NAMED_IAM"
 resolve_s3        = true
-# parameter_overrides se pasa en el comando:
-# sam deploy --parameter-overrides FredApiKey=<key>
+# FRED API key en Secrets Manager: poc-inflation/fred-api-key
+# Gemini API key en Secrets Manager: poc-inflation/gemini-api-key
+# No se requieren parameter_overrides

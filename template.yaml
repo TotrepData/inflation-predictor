@@ -6,10 +6,6 @@ Description: >
 
 # ─── Parámetros ───────────────────────────────────────────────────────────────
 Parameters:
-  FredApiKey:
-    Type: String
-    NoEcho: true
-    Description: API Key de FRED (gratuita en fred.stlouisfed.org)
   S3Bucket:
     Type: String
     Default: poc-inflation-predictor
@@ -56,6 +52,14 @@ Resources:
       ManagedPolicyArns:
         - arn:aws:iam::aws:policy/AmazonS3FullAccess
         - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+      Policies:
+        - PolicyName: ReadSecretsManager
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action: secretsmanager:GetSecretValue
+                Resource: !Sub arn:aws:secretsmanager:${AWS::Region}:${AWS::AccountId}:secret:poc-inflation/*
 
   # Lambda 1 — Collector (invocación manual o programada)
   # Al terminar escribe bronze/_ready → dispara automáticamente el ETL
@@ -70,7 +74,7 @@ Resources:
 
       Environment:
         Variables:
-          FRED_API_KEY: !Ref FredApiKey
+          FRED_API_KEY_SECRET: poc-inflation/fred-api-key
 
   # Lambda 2 — ETL
   # Se dispara automáticamente cuando Collector escribe bronze/_ready
