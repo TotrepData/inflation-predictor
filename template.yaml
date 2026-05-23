@@ -92,7 +92,7 @@ Resources:
             Filter:
               S3Key:
                 Rules:
-                  - Name: key
+                  - Name: prefix
                     Value: bronze/_ready
 
   # Lambda 3 — Features
