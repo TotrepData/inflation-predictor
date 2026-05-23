@@ -49,14 +49,14 @@ def handler(event, context):
 
     for codigo, nombre in SERIES_FRED.items():
         df = descargar_serie(codigo)
-        key = f"bronze/{nombre}_raw.csv"
-        buf = io.StringIO()
-        df.to_csv(buf, index=False)
+        key = f"bronze/{nombre}_raw.parquet"
+        buf = io.BytesIO()
+        df.to_parquet(buf, index=False)
         s3.put_object(
             Bucket=S3_BUCKET,
             Key=key,
-            Body=buf.getvalue().encode("utf-8"),
-            ContentType="text/csv",
+            Body=buf.getvalue(),
+            ContentType="application/octet-stream",
         )
         resultados[nombre] = len(df)
         print(f"OK {key} ({len(df)} filas)")

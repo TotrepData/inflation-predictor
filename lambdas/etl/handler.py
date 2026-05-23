@@ -3,7 +3,6 @@ import io
 import json
 import boto3
 import pandas as pd
-import numpy as np
 
 S3_BUCKET = os.environ["S3_BUCKET"]
 
@@ -22,13 +21,9 @@ SERIES_FRED = [
 ]
 
 
-def leer_bronze_csv(s3, nombre):
-    obj = s3.get_object(Bucket=S3_BUCKET, Key=f"bronze/{nombre}_raw.csv")
-    df = pd.read_csv(io.BytesIO(obj["Body"].read()))
-    df["date"] = pd.to_datetime(df["date"])
-    df["value"] = df["value"].replace(".", np.nan)
-    df["value"] = pd.to_numeric(df["value"], errors="coerce")
-    return df
+def leer_bronze_parquet(s3, nombre):
+    obj = s3.get_object(Bucket=S3_BUCKET, Key=f"bronze/{nombre}_raw.parquet")
+    return pd.read_parquet(io.BytesIO(obj["Body"].read()))
 
 
 def handler(event, context):
@@ -36,7 +31,7 @@ def handler(event, context):
 
     series_limpias = {}
     for nombre in SERIES_FRED:
-        df = leer_bronze_csv(s3, nombre)
+        df = leer_bronze_parquet(s3, nombre)
 
         # Oil price llega diario desde FRED → agregar a mensual por promedio
         if nombre == "oil_price":
@@ -47,10 +42,8 @@ def handler(event, context):
         series_limpias[nombre] = df
 
     # Gold price viene del World Bank (semilla ya en bronze)
-    gold_obj = s3.get_object(Bucket=S3_BUCKET, Key="bronze/gold_price_raw.csv")
-    df_gold = pd.read_csv(io.BytesIO(gold_obj["Body"].read()))
-    df_gold["date"] = pd.to_datetime(df_gold["date"])
-    df_gold["value"] = pd.to_numeric(df_gold["value"], errors="coerce")
+    gold_obj = s3.get_object(Bucket=S3_BUCKET, Key="bronze/gold_price_raw.parquet")
+    df_gold = pd.read_parquet(io.BytesIO(gold_obj["Body"].read()))
     df_gold = df_gold.rename(columns={"value": "gold_price"})
 
     # Merge de todas las series
