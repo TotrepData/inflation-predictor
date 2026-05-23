@@ -13,7 +13,7 @@ Parameters:
   S3Bucket:
     Type: String
     Default: poc-inflation-predictor
-    Description: Bucket S3 donde se almacenan los datos del pipeline
+    Description: Nombre del bucket S3 del pipeline
 
 # ─── Configuración compartida entre las 3 funciones ──────────────────────────
 Globals:
@@ -31,6 +31,16 @@ Globals:
 # ─── Recursos ─────────────────────────────────────────────────────────────────
 Resources:
 
+  # Bucket S3 — declarado aquí para que SAM pueda configurar los triggers de eventos.
+  # DeletionPolicy: Retain → sam delete no elimina el bucket ni los datos.
+  # NOTA: si el bucket ya existe en tu cuenta, elimínalo antes del primer
+  #       sam deploy (los modelos están en models/ del repo para re-subir).
+  DataBucket:
+    Type: AWS::S3::Bucket
+    DeletionPolicy: Retain
+    Properties:
+      BucketName: !Ref S3Bucket
+
   # Rol IAM compartido por las 3 Lambdas
   LambdaRole:
     Type: AWS::IAM::Role
@@ -47,8 +57,8 @@ Resources:
         - arn:aws:iam::aws:policy/AmazonS3FullAccess
         - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
 
-  # Lambda 1 — Collector
-  # Descarga las 11 series de FRED API y las guarda como CSV en S3 bronze/
+  # Lambda 1 — Collector (invocación manual o programada)
+  # Al terminar escribe bronze/_ready → dispara automáticamente el ETL
   CollectorFunction:
     Type: AWS::Serverless::Function
     Properties:
@@ -56,13 +66,15 @@ Resources:
       Handler: handler.handler
       CodeUri: lambdas/collector/
       Role: !GetAtt LambdaRole.Arn
-      Description: Descarga 11 series FRED → S3 bronze/*.csv
+      Description: Descarga 11 series FRED → bronze/*.csv y escribe bronze/_ready
+
       Environment:
         Variables:
           FRED_API_KEY: !Ref FredApiKey
 
   # Lambda 2 — ETL
-  # Lee bronze/*.csv, hace merge + limpieza, guarda silver/dataset_modelo.parquet
+  # Se dispara automáticamente cuando Collector escribe bronze/_ready
+  # Produce silver/dataset_modelo.parquet → dispara automáticamente Features
   EtlFunction:
     Type: AWS::Serverless::Function
     Properties:
@@ -71,9 +83,21 @@ Resources:
       CodeUri: lambdas/etl/
       Role: !GetAtt LambdaRole.Arn
       Description: Merge + limpieza bronze → silver/dataset_modelo.parquet
+      Events:
+        BronzeReady:
+          Type: S3
+          Properties:
+            Bucket: !Ref DataBucket
+            Events: s3:ObjectCreated:*
+            Filter:
+              S3Key:
+                Rules:
+                  - Name: key
+                    Value: bronze/_ready
 
   # Lambda 3 — Features
-  # Lee silver/dataset_modelo.parquet, ejecuta feature engineering, guarda gold/features.parquet
+  # Se dispara automáticamente cuando ETL escribe silver/dataset_modelo.parquet
+  # Produce gold/features.parquet → listo para SageMaker Notebook
   FeaturesFunction:
     Type: AWS::Serverless::Function
     Properties:
@@ -82,9 +106,23 @@ Resources:
       CodeUri: lambdas/features/
       Role: !GetAtt LambdaRole.Arn
       Description: Feature engineering silver → gold/features.parquet
+      Events:
+        SilverReady:
+          Type: S3
+          Properties:
+            Bucket: !Ref DataBucket
+            Events: s3:ObjectCreated:*
+            Filter:
+              S3Key:
+                Rules:
+                  - Name: prefix
+                    Value: silver/dataset_modelo
 
 # ─── Outputs ──────────────────────────────────────────────────────────────────
 Outputs:
+  DataBucket:
+    Description: Bucket S3 del pipeline
+    Value: !Ref DataBucket
   CollectorFunction:
     Description: ARN de fn-poc-collector
     Value: !GetAtt CollectorFunction.Arn

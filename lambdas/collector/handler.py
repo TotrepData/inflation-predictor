@@ -61,6 +61,10 @@ def handler(event, context):
         resultados[nombre] = len(df)
         print(f"OK {key} ({len(df)} filas)")
 
+    # Centinela que dispara automáticamente el Lambda ETL vía trigger S3
+    s3.put_object(Bucket=S3_BUCKET, Key="bronze/_ready", Body=b"")
+    print("OK bronze/_ready → trigger ETL")
+
     return {
         "statusCode": 200,
         "body": json.dumps({"series_descargadas": resultados}),
